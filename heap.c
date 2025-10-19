@@ -1,3 +1,5 @@
+#ifndef HEAP_C
+#define HEAP_C
 #include <stdio.h>
 #include <stdlib.h>
 #include "./pessoa.h"
@@ -10,7 +12,7 @@ typedef struct {
     size_t size;
     size_t capacity;
 } Heap;
-#define empty(h) (h->size == 1)
+#define empty_pq(h) (h->size == 1)
 
 Heap * new_heap() {
     Heap *h = malloc(sizeof(Heap));
@@ -20,7 +22,7 @@ Heap * new_heap() {
     return h;
 }
 
-void enq(Heap * h, Pessoa p) {
+void enq_pq(Heap * h, Pessoa p) {
 	if (h->size == h->capacity) {
 		h->capacity *= 2;
 		h->data = realloc(h->data, sizeof(int) * h->capacity);
@@ -41,14 +43,14 @@ void enq(Heap * h, Pessoa p) {
 	}
 }
 
-Pessoa * peek(Heap * h) {
+Pessoa * peek_pq(Heap * h) {
 	if (h->size > 1) {
 		return &h->data[1];
 	}
 	return NULL;
 }
 
-void pop(Heap * h) {
+void deq_pq(Heap * h) {
 	Pessoa last = h->data[h->size - 1];
 	h->data[h->size - 1].caso = 0;
 	h->data[1] = last;
@@ -78,26 +80,44 @@ void pop(Heap * h) {
 			curr = max;
 			continue;
 		}
+		if (minv.caso > 0 && minv.caso == h->data[curr].caso && minv.hora < h->data[curr].hora) {
+			Pessoa temp = h->data[curr];
+			h->data[curr] = minv;
+			h->data[min] = temp;
+			curr = min;
+			continue;
+		}  
+		if (maxv.caso > 0 && maxv.caso == h->data[curr].caso && maxv.hora < h->data[curr].hora) {
+			Pessoa temp = h->data[curr];
+			h->data[curr] = maxv;
+			h->data[max] = temp;
+			curr = max;
+			continue;
+		}
 		break;
 	}
 }
 
-int main(void) {
-	Heap * h = new_heap();
-	Pessoa p1 = {5, "Joao"};
-	Pessoa p2 = {3, "Maria"};
-	Pessoa p4 = {1, "Ana"};
-	Pessoa p5 = {4, "Lucas"};
-	Pessoa p3 = {8, "Artur"};
-	enq(h, p1);
-	enq(h, p2);
-	enq(h, p3);
-	enq(h, p4);
-	enq(h, p5);
-	while (!empty(h)) {
-		Pessoa * p = peek(h);
-		printf("Caso: %d, Nome: %s\n", p->caso, p->nome);
-		pop(h);
-	}
+void free_pq(Heap * h) {
+	free(h->data);
+	free(h);
 }
 
+#include "fila.c"
+
+int print_pq(Heap * h, char * to, int n) {
+	Fila * f = nova_fila();
+	while (!empty_pq(h)) {
+		Pessoa * p = peek_pq(h);
+		enq_q(f, *p);
+		deq_pq(h);
+	}
+	n = print_q(f, to, n);
+	while (!empty_q(f)) {
+		Pessoa * p = &f->prim->p;
+		enq_pq(h, *p);
+		deq_q(f);
+	}
+	return n;
+}
+#endif

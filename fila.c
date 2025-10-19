@@ -1,6 +1,9 @@
+#ifndef FILA_C
+#define FILA_C
 #include <stdlib.h>
 #include <stdio.h>
 #include "pessoa.h"
+
 
 typedef struct {
     Pessoa p;
@@ -19,7 +22,7 @@ Fila * nova_fila() {
     return f;
 }
 
-void enq(Fila* f, Pessoa p) {
+void enq_q(Fila* f, Pessoa p) {
     Node* newNode = (Node*)malloc(sizeof(Node));
     newNode->p = p;
     newNode->next = NULL;
@@ -32,7 +35,7 @@ void enq(Fila* f, Pessoa p) {
     }
 }
 
-void deq(Fila * f) {
+void deq_q(Fila * f) {
     Node* temp = f->prim;
     f->prim = (Node*)f->prim->next;
     if (f->prim == NULL) {
@@ -41,14 +44,27 @@ void deq(Fila * f) {
     free(temp);
 }
 
-void print(Fila * f) {
+int print_q(Fila * f, char * to, int n) {
 	Node* current = f->prim;
-	while (current != NULL) {
-		printf("%s", current->p.nome);
-		if (current->next != NULL) printf(" -> ");
+	int count = 0;
+	while (current != NULL && count < n) {
+		count += sprintf(to + count, "%s", current->p.nome);
+		if (current->next != NULL) count += sprintf(to + count, " -> ");
 		current = (Node*)current->next;
 	}
-	printf("\n");
+	return count;
 }
 
-#define empty(f) (f->prim == NULL && f->fim == NULL)
+void free_q(Fila *f) {
+    Node* current = f->prim;
+    Node* nextNode;
+    while (current != NULL) {
+	nextNode = (Node*)current->next;
+	free(current);
+	current = nextNode;
+    }
+    free(f);
+}
+
+#define empty_q(f) (f->prim == NULL && f->fim == NULL)
+#endif
